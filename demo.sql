@@ -22,6 +22,12 @@ CREATE TABLE `bilibili_user_info` (
     `li_current_min` int(11) DEFAULT NULL,
     `li_current_exp` int(11) DEFAULT NULL,
     `li_next_exp` int(11) DEFAULT NULL,
+    `pdt_pid` int(11) DEFAULT NULL,
+    `pdt_name` varchar(100) DEFAULT NULL,
+    `pdt_expire` varchar(50) DEFAULT NULL,
+    `ov_type` int(11) DEFAULT NULL,
+    `ov_desc` varchar(200) DEFAULT NULL,
+    `theme` varchar(50) DEFAULT NULL,
     `playNum` int(11) DEFAULT NULL,
     PRIMARY KEY(`id`)
 )CHARSET=utf8;

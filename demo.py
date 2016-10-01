@@ -1,3 +1,6 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+
 import urllib
 import urllib2
 import cookielib
@@ -6,12 +9,10 @@ import json
 import MySQLdb
 import datetime
 from multiprocessing.dummy import Pool as ThreadPool
-
 # get user info from bilibili.com and save to MySql database
 
 # sudo apt-get install python-mysqldb
 # max_mid 44570800 2016-09-30
-
 def datetime_to_timestamp_in_milliseconds(d):
     current_milli_time = lambda: int(round(time.time() * 1000))
     return current_milli_time()
@@ -77,6 +78,12 @@ def save_2_database(data_dict):
     li_current_min = dd['level_info']['current_min']
     li_current_exp = dd['level_info']['current_exp']
     li_next_exp = dd['level_info']['next_exp']
+    pdt_pid = dd['pendant']['pid']
+    pdt_name = dd['pendant']['name']
+    pdt_expire = dd['pendant']['expire']
+    ov_type = dd['official_verify']['type']
+    ov_desc = dd['official_verify']['desc']
+    theme = dd['theme']
     playNum = dd['playNum']
     # vim :56,74 s/\(\w\+\)/\1 = dd['\1']/g
     try:
@@ -84,13 +91,19 @@ def save_2_database(data_dict):
         cur = mdb.cursor()
         mdb.select_db('bilibili_users')
         sqlStr = "INSERT INTO bilibili_user_info(\
-                 mid,name,sex,face,coins,regtime,spacesta,birthday,place,description,article,attentions,\
-                 fans,friend,attention,sign,li_current_level,li_current_min,li_current_exp,li_next_exp,playNum) \
+                    mid,name,sex,face,coins,regtime,spacesta,birthday,place,description,article,attentions,\
+                    fans,friend,attention,sign,li_current_level,li_current_min,li_current_exp,li_next_exp,\
+                    pdt_pid,pdt_name,pdt_expire,ov_type,ov_desc,theme,playNum\
+                    ) \
                  VALUES(\
-                 '%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s' \
-                 )" % \
-                 (mid,name,sex,face,coins,regtime,spacesta,birthday,place,description,article,attentions,\
-                 fans,friend,attention,sign,li_current_level,li_current_min,li_current_exp,li_next_exp,playNum)
+                    '%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s',\
+                    '%s','%s','%s','%s','%s','%s','%s','%s','%s',\
+                    '%s','%s','%s','%s','%s','%s','%s'\
+                    )" % (\
+                    mid,name,sex,face,coins,regtime,spacesta,birthday,place,description,article,attentions,\
+                    fans,friend,attention,sign,li_current_level,li_current_min,li_current_exp,li_next_exp,\
+                    pdt_pid,pdt_name,pdt_expire,ov_type,ov_desc,theme,playNum\
+                    )
         # print "Execute sql"
         cur.execute(sqlStr)
         # print "Commit"
@@ -124,7 +137,6 @@ def save_cookie():
 def get_newest_mid(min_mid, max_mid=1300000000):
     if try_con(max_mid):
         return max_mid
-    else 
 
 def try_con(mid):    
     url = "http://space.bilibili.com/ajax/member/GetInfo"
@@ -139,21 +151,15 @@ def try_con(mid):
     else:
         return True
 
-
-
 def test(mid=930055):
-    # mid=930055 is not exist in bilibili databases,
-    # this function just for connection test
     get_page(mid)
 
 def run_test():
-    # simple test
     mid_start = 930500
     mid_end = 931000
     mids = [x for x in range(mid_start, mid_end)]
     # print mids
-    # 4 workers
-    pool = ThreadPool(20)
+    pool = ThreadPool(1)
     results = pool.map(get_page, mids)
     # try:
     #     results = pool.map(get_page, mids)
@@ -168,5 +174,3 @@ if __name__ == '__main__':
     # test()
     run_test()
     # try_con(mid=930909)
-
-
