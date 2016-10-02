@@ -122,7 +122,7 @@ class spider:
                         fans,friend,attention,MySQLdb.escape_string(sign),li_current_level,li_current_min,li_current_exp,li_next_exp,\
                         pdt_pid,MySQLdb.escape_string(pdt_name),pdt_expire,ov_type,ov_desc,theme,playNum\
                         )
-            print sqlStr
+            # print sqlStr
             # print "Execute sql"
             cur.execute(sqlStr)
             # print "Commit"
