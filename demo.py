@@ -16,7 +16,7 @@ from optparse import OptionParser
 # get user info from bilibili.com, then save to MySql database
 
 # python-mysqldb
-# max_mid 44570800 2016-09-30
+# mid_max 44570800 2016-09-30
 
 class spider:
     '''
@@ -24,12 +24,14 @@ class spider:
     '''
     def __init__(self):
         self.mode = "normal"
-        self.step = 150
-        self.sleep = 20
-        self.foot_num = 4
+        self.step = 2048
+        self.sleep = 2
+        self.foot_num = 16
         self.mid = 930055
         self.mid_start = 1
+        self.mid_max = 60000000
         self.rmsg = True
+        self.time_start = time.time()
     
     def datetime_to_timestamp_in_milliseconds(self, d):
         current_milli_time = lambda: int(round(time.time() * 1000))
@@ -156,21 +158,18 @@ class spider:
     def test(self):
         self.get_page(self.mid)
 
-    def run_test(self, max_mid=1300000000):
-        
+    def run_test(self):
+
+        mid_max = self.mid_max
         workers = self.foot_num
         mid_start = self.mid_start
         mid_end = mid_start + self.step
-
+        
         if self.step < workers:
             workers = self.step
-        
-        while mid_start < max_mid:
-            if self.rmsg:
-                print "-----------------------------------"
-                print "Time:%s" % time.time()
-                print "mid range:%s->%s" % (mid_start, mid_end-1)
-                print "-----------------------------------"
+        print "---------------------------------------------Start----------------------------------------------" 
+        while mid_start < mid_max:
+            time_step_start = time.time()
 
             mids = [x for x in range(mid_start, mid_end)]
             
@@ -180,11 +179,27 @@ class spider:
             pool.close()
             pool.join()
 
+            if self.rmsg:
+                
+                time_step_end = time.time()
+                data_ps = self.step / (time_step_end - time_step_start)
+                avg_data_ps = (mid_end - self.mid_start) / (time_step_end - self.time_start)
+                f_progress = (mid_end - self.mid_start) / (self.mid_max * 1.0)
+                
+                print "#%s>%s" % ('|' * int(f_progress * 100), '-' * int((1- f_progress) * 100))
+                print "Time: %s -> %s" % (time_step_start, time_step_end)
+                print "Got mid: %s -> %s at speed: %s" % (mid_start, mid_end-1, data_ps)
+                print "Average speed: %s" % (avg_data_ps)
+                print "Progress: %.4f%%" % (f_progress * 100)
+                print "Parameter: -t %s -f %s -p %s" % (self.step, self.foot_num, self.sleep)
+                print "#%s>%s" % ('|' * int(f_progress * 100), '-' * int((1- f_progress) * 100))
+
             mid_start = mid_end
             mid_end = mid_start + self.step
 
             if self.sleep > 0: 
                 time.sleep(self.sleep)
+
 
 if __name__ == '__main__':
 
@@ -200,13 +215,13 @@ if __name__ == '__main__':
                         type="int", dest="startmid", default=1,
                         help="-s 930055")
     parser.add_option("-t", "--step",
-                        type="int", dest="step", default=150,
+                        type="int", dest="step", default=2048,
                         help="step must >0")
     parser.add_option("-f", "--foot_num",
-                        type="int", dest="foot_num", default=4,
+                        type="int", dest="foot_num", default=16,
                         help="foot_num must >=1")
     parser.add_option("-p", "--sleep",
-                        type="int", dest="sleep", default=20)
+                        type="int", dest="sleep", default=2)
     parser.add_option("-r", "--rmsg", action="store_false",
                         dest="rmsg", default=True,
                         help="-r: not to print running msg")
